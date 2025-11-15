@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import type { CareerPlan } from '../types';
 import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon, SaveIcon } from './Icons';
@@ -7,21 +6,22 @@ interface ResultsDisplayProps {
   plan: CareerPlan;
   onSave: () => void;
   isSaved: boolean;
+  completedResources: Record<string, boolean>;
+  onUpdateCompletedResources: (completed: Record<string, boolean>) => void;
 }
 
 type Tab = 'gap' | 'project' | 'roadmap';
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved, completedResources, onUpdateCompletedResources }) => {
   const [activeTab, setActiveTab] = useState<Tab>('gap');
   const { skillGapAnalysis, projectBrief, learningRoadmap } = plan;
   const [isCopied, setIsCopied] = useState(false);
-  const [completedResources, setCompletedResources] = useState<Record<string, boolean>>({});
 
   const handleToggleComplete = (resourceId: string) => {
-    setCompletedResources(prev => ({
-      ...prev,
-      [resourceId]: !prev[resourceId],
-    }));
+    onUpdateCompletedResources({
+      ...completedResources,
+      [resourceId]: !completedResources[resourceId],
+    });
   };
 
   const handleCopy = () => {

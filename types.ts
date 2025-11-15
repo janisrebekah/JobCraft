@@ -35,4 +35,5 @@ export interface SavedPlan extends CareerPlan {
   id: string;
   title: string;
   createdAt: string;
+  completedResources?: Record<string, boolean>;
 }

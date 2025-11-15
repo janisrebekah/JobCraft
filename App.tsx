@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [activeCompletedResources, setActiveCompletedResources] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     try {
@@ -56,6 +57,7 @@ const App: React.FC = () => {
     setError(null);
     setPlan(null);
     setActivePlanId(null);
+    setActiveCompletedResources({});
 
     try {
       const result = await geminiService.generateCareerPlan(resumeText, jobDescription);
@@ -71,6 +73,7 @@ const App: React.FC = () => {
   const handleNewPlan = () => {
     setPlan(null);
     setActivePlanId(null);
+    setActiveCompletedResources({});
     setResumeText('');
     setJobDescription('');
     setFileName('');
@@ -85,6 +88,7 @@ const App: React.FC = () => {
       id: Date.now().toString(),
       title: plan.projectBrief.title || 'Untitled Plan',
       createdAt: new Date().toISOString(),
+      completedResources: activeCompletedResources,
     };
 
     setSavedPlans(prev => [newSavedPlan, ...prev]);
@@ -103,12 +107,24 @@ const App: React.FC = () => {
     if (planToLoad) {
       setPlan(planToLoad);
       setActivePlanId(id);
+      setActiveCompletedResources(planToLoad.completedResources || {});
       setResumeText('');
       setJobDescription('');
       setFileName('');
       setError(null);
     }
   };
+
+  const handleUpdateCompletedResources = (newCompleted: Record<string, boolean>) => {
+    setActiveCompletedResources(newCompleted);
+    if (activePlanId) {
+      setSavedPlans(prev => prev.map(p =>
+        p.id === activePlanId
+          ? { ...p, completedResources: newCompleted }
+          : p
+      ));
+    }
+  }
 
   const hasInputs = resumeText.trim().length > 0 && jobDescription.trim().length > 0;
   const isPlanSaved = activePlanId !== null && savedPlans.some(p => p.id === activePlanId);
@@ -212,7 +228,13 @@ const App: React.FC = () => {
                     </p>
                 </div>
               )}
-              {plan && <ResultsDisplay plan={plan} onSave={handleSavePlan} isSaved={isPlanSaved} />}
+              {plan && <ResultsDisplay
+                plan={plan}
+                onSave={handleSavePlan}
+                isSaved={isPlanSaved}
+                completedResources={activeCompletedResources}
+                onUpdateCompletedResources={handleUpdateCompletedResources}
+              />}
             </div>
           </div>
         </main>
