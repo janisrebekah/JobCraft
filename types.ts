@@ -35,5 +35,29 @@ export interface SavedPlan extends CareerPlan {
   id: string;
   title: string;
   createdAt: string;
+  resume: string;
+  jobDescription: string;
   completedResources?: Record<string, boolean>;
+}
+
+export interface InterviewQuestion {
+  question: string;
+  hint: string;
+}
+
+export interface InterviewPrep {
+  technical: InterviewQuestion[];
+  behavioral: InterviewQuestion[];
+  situational: InterviewQuestion[];
+}
+
+export interface ResumeSuggestion {
+  section: string;
+  originalTextSnippet: string;
+  suggestion: string;
+}
+
+export interface ResumeEnhancement {
+  summary: string;
+  suggestions: ResumeSuggestion[];
 }

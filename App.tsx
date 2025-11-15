@@ -88,6 +88,8 @@ const App: React.FC = () => {
       id: Date.now().toString(),
       title: plan.projectBrief.title || 'Untitled Plan',
       createdAt: new Date().toISOString(),
+      resume: resumeText,
+      jobDescription: jobDescription,
       completedResources: activeCompletedResources,
     };
 
@@ -128,6 +130,7 @@ const App: React.FC = () => {
 
   const hasInputs = resumeText.trim().length > 0 && jobDescription.trim().length > 0;
   const isPlanSaved = activePlanId !== null && savedPlans.some(p => p.id === activePlanId);
+  const activeSavedPlan = savedPlans.find(p => p.id === activePlanId);
 
   return (
     <div className="h-screen bg-slate-900 text-slate-200 font-sans flex flex-col">
@@ -230,6 +233,8 @@ const App: React.FC = () => {
               )}
               {plan && <ResultsDisplay
                 plan={plan}
+                resume={activeSavedPlan?.resume || resumeText}
+                jobDescription={activeSavedPlan?.jobDescription || jobDescription}
                 onSave={handleSavePlan}
                 isSaved={isPlanSaved}
                 completedResources={activeCompletedResources}

@@ -1,21 +1,41 @@
-import React, { useState } from 'react';
-import type { CareerPlan } from '../types';
-import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon, SaveIcon } from './Icons';
+import React, { useState, useEffect } from 'react';
+import type { CareerPlan, InterviewPrep, ResumeEnhancement } from '../types';
+import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon, SaveIcon, MessageSquareIcon, PencilIcon } from './Icons';
+import * as geminiService from '../services/geminiService';
+import Loader from './Loader';
 
 interface ResultsDisplayProps {
   plan: CareerPlan;
+  resume: string;
+  jobDescription: string;
   onSave: () => void;
   isSaved: boolean;
   completedResources: Record<string, boolean>;
   onUpdateCompletedResources: (completed: Record<string, boolean>) => void;
 }
 
-type Tab = 'gap' | 'project' | 'roadmap';
+type Tab = 'gap' | 'project' | 'roadmap' | 'prep' | 'enhancer';
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved, completedResources, onUpdateCompletedResources }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, resume, jobDescription, onSave, isSaved, completedResources, onUpdateCompletedResources }) => {
   const [activeTab, setActiveTab] = useState<Tab>('gap');
   const { skillGapAnalysis, projectBrief, learningRoadmap } = plan;
   const [isCopied, setIsCopied] = useState(false);
+  
+  const [interviewPrep, setInterviewPrep] = useState<InterviewPrep | null>(null);
+  const [isPrepLoading, setIsPrepLoading] = useState<boolean>(false);
+  const [prepError, setPrepError] = useState<string | null>(null);
+
+  const [resumeEnhancements, setResumeEnhancements] = useState<ResumeEnhancement | null>(null);
+  const [isEnhancerLoading, setIsEnhancerLoading] = useState<boolean>(false);
+  const [enhancerError, setEnhancerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Reset dynamic content when plan changes
+    setInterviewPrep(null);
+    setPrepError(null);
+    setResumeEnhancements(null);
+    setEnhancerError(null);
+  }, [plan]);
 
   const handleToggleComplete = (resourceId: string) => {
     onUpdateCompletedResources({
@@ -29,6 +49,33 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved, 
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
     });
+  };
+
+  const handleTabChange = async (tab: Tab) => {
+    setActiveTab(tab);
+    if (tab === 'prep' && !interviewPrep && !isPrepLoading) {
+      setIsPrepLoading(true);
+      setPrepError(null);
+      try {
+        const result = await geminiService.generateInterviewQuestions(resume, jobDescription, skillGapAnalysis.missingSkills);
+        setInterviewPrep(result);
+      } catch (e: any) {
+        setPrepError(`Failed to generate interview prep: ${e.message}`);
+      } finally {
+        setIsPrepLoading(false);
+      }
+    } else if (tab === 'enhancer' && !resumeEnhancements && !isEnhancerLoading) {
+      setIsEnhancerLoading(true);
+      setEnhancerError(null);
+      try {
+        const result = await geminiService.generateResumeEnhancements(resume, jobDescription);
+        setResumeEnhancements(result);
+      } catch (e: any) {
+        setEnhancerError(`Failed to generate resume enhancements: ${e.message}`);
+      } finally {
+        setIsEnhancerLoading(false);
+      }
+    }
   };
 
   const renderSkillGap = () => (
@@ -120,20 +167,87 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved, 
     </div>
   );
 
+  const renderInterviewPrep = () => (
+    <div className="space-y-6 animate-fade-in">
+        {isPrepLoading && <Loader />}
+        {prepError && <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg">{prepError}</div>}
+        {interviewPrep && (
+            <div className="space-y-6">
+                <QuestionSection title="Technical Questions" questions={interviewPrep.technical} />
+                <QuestionSection title="Behavioral Questions" questions={interviewPrep.behavioral} />
+                <QuestionSection title="Situational Questions" questions={interviewPrep.situational} />
+            </div>
+        )}
+    </div>
+  );
+
+  const QuestionSection = ({ title, questions }: { title: string; questions: any[] }) => (
+    <div>
+        <h3 className="text-xl font-bold text-cyan-300 mb-3">{title}</h3>
+        <div className="space-y-3">
+            {questions.map((q, i) => (
+                <details key={i} className="bg-slate-900/50 rounded-lg overflow-hidden">
+                    <summary className="font-semibold text-slate-200 p-4 cursor-pointer hover:bg-slate-900 transition-colors">
+                        {q.question}
+                    </summary>
+                    <div className="p-4 border-t border-slate-700 text-sm text-slate-400">
+                        <p className="font-bold text-slate-300 mb-2">What they're looking for:</p>
+                        <p>{q.hint}</p>
+                    </div>
+                </details>
+            ))}
+        </div>
+    </div>
+  );
+
+  const renderResumeEnhancer = () => (
+    <div className="space-y-6 animate-fade-in">
+        {isEnhancerLoading && <Loader />}
+        {enhancerError && <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg">{enhancerError}</div>}
+        {resumeEnhancements && (
+            <div className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-bold text-cyan-300 mb-2">Overall Feedback</h3>
+                    <p className="text-slate-300 bg-slate-900/50 p-4 rounded-lg text-sm">{resumeEnhancements.summary}</p>
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold text-cyan-300 mb-3">Actionable Suggestions</h3>
+                    <div className="space-y-4">
+                        {resumeEnhancements.suggestions.map((s, i) => (
+                            <div key={i} className="bg-slate-900/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-300">{s.section}</h4>
+                                {s.originalTextSnippet && (
+                                    <blockquote className="text-xs text-slate-400 border-l-2 border-slate-600 pl-3 my-2 italic">
+                                        "{s.originalTextSnippet}"
+                                    </blockquote>
+                                )}
+                                <p className="text-sm text-slate-300 mt-2">{s.suggestion}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
+);
+
+
   const tabs: { id: Tab, label: string; icon: React.ReactNode }[] = [
     { id: 'gap', label: 'Skill Gap', icon: <TargetIcon className="w-5 h-5" /> },
     { id: 'project', label: 'Starter Project', icon: <GitHubIcon className="w-5 h-5" /> },
     { id: 'roadmap', label: 'Learning Roadmap', icon: <FileCodeIcon className="w-5 h-5" /> },
+    { id: 'enhancer', label: 'Resume Enhancer', icon: <PencilIcon className="w-5 h-5" /> },
+    { id: 'prep', label: 'Interview Prep', icon: <MessageSquareIcon className="w-5 h-5" /> },
   ];
 
   return (
     <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 shadow-lg animate-fade-in min-h-[400px]">
       <div className="flex justify-between items-center border-b border-slate-700 mb-6">
-        <div className="flex">
+        <div className="flex flex-wrap">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabChange(tab.id)}
                     className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2
                         ${activeTab === tab.id
                             ? 'border-cyan-400 text-cyan-400'
@@ -160,6 +274,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved, 
         {activeTab === 'gap' && renderSkillGap()}
         {activeTab === 'project' && renderProjectBrief()}
         {activeTab === 'roadmap' && renderLearningRoadmap()}
+        {activeTab === 'prep' && renderInterviewPrep()}
+        {activeTab === 'enhancer' && renderResumeEnhancer()}
       </div>
     </div>
   );
