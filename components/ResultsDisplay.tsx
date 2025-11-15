@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import type { CareerPlan } from '../types';
-import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon } from './Icons';
+import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon } from './Icons';
 
 interface ResultsDisplayProps {
   plan: CareerPlan;
@@ -12,6 +13,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan }) => {
   const [activeTab, setActiveTab] = useState<Tab>('gap');
   const { skillGapAnalysis, projectBrief, learningRoadmap } = plan;
   const [isCopied, setIsCopied] = useState(false);
+  const [completedResources, setCompletedResources] = useState<Record<string, boolean>>({});
+
+  const handleToggleComplete = (resourceId: string) => {
+    setCompletedResources(prev => ({
+      ...prev,
+      [resourceId]: !prev[resourceId],
+    }));
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(projectBrief.readmeContent).then(() => {
@@ -75,18 +84,29 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan }) => {
                 <div className="p-4 border-t border-slate-700">
                     <ul className="space-y-3">
                         {topic.resources.map((res, j) => {
+                            const resourceId = `${i}-${j}`;
+                            const isCompleted = completedResources[resourceId];
                             const searchUrl = res.type === 'YouTube'
                               ? `https://www.youtube.com/results?search_query=${encodeURIComponent(res.query)}`
                               : `https://www.google.com/search?q=${encodeURIComponent(res.query)}`;
                             
                             return (
-                                <li key={j}>
-                                    <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-cyan-300 hover:text-cyan-200 transition-colors group">
+                                <li key={j} className="flex items-center gap-3 group">
+                                    <button
+                                        onClick={() => handleToggleComplete(resourceId)}
+                                        className={`w-5 h-5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-all ${
+                                            isCompleted ? 'bg-cyan-500 border-cyan-500' : 'bg-slate-800 border-slate-600 group-hover:border-cyan-500'
+                                        }`}
+                                        aria-label={`Mark ${res.title} as complete`}
+                                    >
+                                        {isCompleted && <CheckIcon className="w-3 h-3 text-slate-900" />}
+                                    </button>
+                                    <a href={searchUrl} target="_blank" rel="noopener noreferrer" className={`flex-grow flex items-center gap-3 text-sm transition-colors ${isCompleted ? 'text-slate-500 line-through' : 'text-cyan-300 hover:text-cyan-200'}`}>
                                         {res.type === 'YouTube' 
-                                            ? <YoutubeIcon className="w-5 h-5 text-red-500 flex-shrink-0" /> 
-                                            : <SearchIcon className="w-5 h-5 text-slate-400 flex-shrink-0" />}
-                                        <span className="flex-grow group-hover:underline">{res.title}</span>
-                                        <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">{res.type}</span>
+                                            ? <YoutubeIcon className={`w-5 h-5 flex-shrink-0 ${isCompleted ? 'text-slate-600' : 'text-red-500'}`} /> 
+                                            : <SearchIcon className={`w-5 h-5 flex-shrink-0 ${isCompleted ? 'text-slate-600' : 'text-slate-400'}`} />}
+                                        <span className={`flex-grow ${!isCompleted ? 'group-hover:underline' : ''}`}>{res.title}</span>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${isCompleted ? 'bg-slate-800 text-slate-500' : 'bg-slate-700 text-slate-300'}`}>{res.type}</span>
                                     </a>
                                 </li>
                             );
