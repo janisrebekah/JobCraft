@@ -1,7 +1,7 @@
 export interface SkillGapAnalysis {
   summary: string;
   matchingSkills: string[];
-  missingSkills: string[];
+  missingSkills:string[];
 }
 
 export interface ProjectBrief {
@@ -29,4 +29,10 @@ export interface CareerPlan {
   learningRoadmap: {
     topics: LearningTopic[];
   };
+}
+
+export interface SavedPlan extends CareerPlan {
+  id: string;
+  title: string;
+  createdAt: string;
 }

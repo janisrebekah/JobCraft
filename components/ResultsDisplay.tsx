@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
 import type { CareerPlan } from '../types';
-import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon } from './Icons';
+import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon, CheckIcon, SaveIcon } from './Icons';
 
 interface ResultsDisplayProps {
   plan: CareerPlan;
+  onSave: () => void;
+  isSaved: boolean;
 }
 
 type Tab = 'gap' | 'project' | 'roadmap';
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan, onSave, isSaved }) => {
   const [activeTab, setActiveTab] = useState<Tab>('gap');
   const { skillGapAnalysis, projectBrief, learningRoadmap } = plan;
   const [isCopied, setIsCopied] = useState(false);
@@ -126,22 +128,33 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan }) => {
 
   return (
     <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 shadow-lg animate-fade-in min-h-[400px]">
-      <div className="flex border-b border-slate-700 mb-6">
-        {tabs.map(tab => (
-            <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2
-                    ${activeTab === tab.id
-                        ? 'border-cyan-400 text-cyan-400'
-                        : 'border-transparent text-slate-400 hover:text-slate-200'
-                    }`}
-                aria-current={activeTab === tab.id ? 'page' : undefined}
-            >
-                {tab.icon}
-                {tab.label}
-            </button>
-        ))}
+      <div className="flex justify-between items-center border-b border-slate-700 mb-6">
+        <div className="flex">
+            {tabs.map(tab => (
+                <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2
+                        ${activeTab === tab.id
+                            ? 'border-cyan-400 text-cyan-400'
+                            : 'border-transparent text-slate-400 hover:text-slate-200'
+                        }`}
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
+                >
+                    {tab.icon}
+                    {tab.label}
+                </button>
+            ))}
+        </div>
+        {!isSaved && (
+          <button
+            onClick={onSave}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 rounded-md transition-colors"
+          >
+            <SaveIcon className="w-4 h-4" />
+            Save Plan
+          </button>
+        )}
       </div>
       <div>
         {activeTab === 'gap' && renderSkillGap()}
