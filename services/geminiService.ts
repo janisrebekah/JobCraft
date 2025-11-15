@@ -5,7 +5,7 @@ if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
 }
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-const model = "gemini-2.5-pro";
+const model = "gemini-2.5-flash";
 
 const persona = "You are JobCraft AI, an expert career development assistant. Your goal is to help users bridge the gap between their current skills and the requirements of their target job by generating a practical, hands-on project and a personalized learning plan. Analyze the user's resume and the job description to provide a detailed, actionable plan in JSON format according to the provided schema.";
 
@@ -50,10 +50,10 @@ export const generateCareerPlan = async (resume: string, jobDescription: string)
                     type: Type.OBJECT,
                     properties: {
                       title: { type: Type.STRING, description: "Title of the resource." },
-                      url: { type: Type.STRING, description: "A valid URL to the resource (e.g., YouTube, official docs, a blog)." },
+                      query: { type: Type.STRING, description: "A concise, effective search query to find a resource for this topic." },
                       type: { type: Type.STRING, enum: ['YouTube', 'Article', 'Course', 'Documentation'], description: "The type of the resource." },
                     },
-                    required: ["title", "url", "type"],
+                    required: ["title", "query", "type"],
                   }
                 }
               },

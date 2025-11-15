@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { CareerPlan } from '../types';
-import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, BookIcon, YoutubeIcon, CopyIcon } from './Icons';
+import { TargetIcon, CheckCircleIcon, XCircleIcon, GitHubIcon, FileCodeIcon, SearchIcon, YoutubeIcon, CopyIcon } from './Icons';
 
 interface ResultsDisplayProps {
   plan: CareerPlan;
@@ -68,21 +68,29 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ plan }) => {
   const renderLearningRoadmap = () => (
      <div className="space-y-4 animate-fade-in">
         {learningRoadmap.topics.map((topic, i) => (
-            <details key={i} className="bg-slate-900/50 rounded-lg overflow-hidden">
+            <details key={i} className="bg-slate-900/50 rounded-lg overflow-hidden" open>
                 <summary className="font-semibold text-purple-300 p-4 cursor-pointer hover:bg-slate-900 transition-colors">
                     {topic.skill}
                 </summary>
                 <div className="p-4 border-t border-slate-700">
                     <ul className="space-y-3">
-                        {topic.resources.map((res, j) => (
-                            <li key={j}>
-                                <a href={res.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-cyan-300 hover:text-cyan-200 transition-colors group">
-                                    {res.type === 'YouTube' ? <YoutubeIcon className="w-5 h-5 text-red-500 flex-shrink-0" /> : <BookIcon className="w-5 h-5 text-slate-400 flex-shrink-0" />}
-                                    <span className="flex-grow group-hover:underline">{res.title}</span>
-                                    <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">{res.type}</span>
-                                </a>
-                            </li>
-                        ))}
+                        {topic.resources.map((res, j) => {
+                            const searchUrl = res.type === 'YouTube'
+                              ? `https://www.youtube.com/results?search_query=${encodeURIComponent(res.query)}`
+                              : `https://www.google.com/search?q=${encodeURIComponent(res.query)}`;
+                            
+                            return (
+                                <li key={j}>
+                                    <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-cyan-300 hover:text-cyan-200 transition-colors group">
+                                        {res.type === 'YouTube' 
+                                            ? <YoutubeIcon className="w-5 h-5 text-red-500 flex-shrink-0" /> 
+                                            : <SearchIcon className="w-5 h-5 text-slate-400 flex-shrink-0" />}
+                                        <span className="flex-grow group-hover:underline">{res.title}</span>
+                                        <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">{res.type}</span>
+                                    </a>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             </details>

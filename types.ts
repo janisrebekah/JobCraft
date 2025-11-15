@@ -1,4 +1,3 @@
-
 export interface SkillGapAnalysis {
   summary: string;
   matchingSkills: string[];
@@ -15,7 +14,7 @@ export interface ProjectBrief {
 
 export interface LearningResource {
   title: string;
-  url: string;
+  query: string;
   type: 'YouTube' | 'Article' | 'Course' | 'Documentation';
 }
 
