@@ -54,14 +54,14 @@ Designed for learners, developers, and career switchers who want a data-driven, 
 
 ---
 Installation
---npm install
+- npm install
 
 ---
 Environment Setup
-Create a .env.local file in the root directory:
---GEMINI_API_KEY=your_api_key_here
+- Create a .env.local file in the root directory:
+- GEMINI_API_KEY=your_api_key_here
 
 ---
 
 Run the App
---npm run dev
+- npm run dev
