@@ -1,20 +1,64 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AI-Powered Skill Gap Analyzer & Learning Roadmap
 
-# Run and deploy your AI Studio app
+An intelligent web application that analyzes user skills, identifies gaps, and generates personalized project briefs and learning roadmaps using Generative AI.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1nsU6XbMd8RvU-pvvP6B3Q1WB_1FsCpcw
+## Overview
 
-## Run Locally
+This project leverages Generative AI to help users:
 
-**Prerequisites:**  Node.js
+- Identify skill gaps based on their current knowledge  
+- Generate tailored project ideas to bridge those gaps  
+- Build structured learning roadmaps  
+- Export learning plans as PDFs  
 
+Designed for learners, developers, and career switchers who want a data-driven, AI-guided growth plan.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## Features
+
+### Skill Gap Analysis
+- Evaluates user input skills  
+- Identifies missing competencies  
+- Suggests improvement areas  
+
+### Personalized Project Briefs
+- AI-generated project ideas  
+- Tailored to user skill level and goals  
+- Helps build real-world portfolio  
+
+### Learning Roadmap
+- Step-by-step structured learning path  
+- Covers concepts, tools, and milestones  
+
+### Persistence
+- Uses `localStorage` to save user data  
+- No backend required for basic usage  
+
+### Export Functionality
+- Generates downloadable PDFs using `jsPDF`  
+
+---
+
+## Tech Stack
+
+| Layer        | Technology |
+|-------------|-----------|
+| Frontend    | React 19 |
+| Language    | TypeScript |
+| AI Engine   | Google Gemini API |
+| Storage     | localStorage |
+| Export Tool | jsPDF |
+
+---
+Installation
+--npm install
+Environment Setup
+
+Create a .env.local file in the root directory:
+--GEMINI_API_KEY=your_api_key_here
+
+Run the App
+--npm run dev
